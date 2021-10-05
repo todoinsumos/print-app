@@ -16,17 +16,16 @@ app.get('/', (req: Request, res: Response) => {
 		message: 'hello world',
 	});
 });
-
 app.listen(PORT, () => {
 	console.log('server started at http://localhost:' + PORT);
 });
-
-// escuchamos a todoinsumos.com
 const socket = io('ws://todoinsumos.com:4000', {
 	reconnectionDelayMax: 10000
 });
 
-interface DataTag {
+
+// ETIQUETAS DE ENVIOS
+interface DeliveryTag {
 	boxes: string,
 	name: string,
 	phone: string,
@@ -34,10 +33,25 @@ interface DataTag {
 	city: string,
 	details: string
 }
+socket.on('-tag-', (tag: DeliveryTag) => {
+	const { boxes, name, phone, address, city, details } = tag;
+	const dir = path.join(__dirname, '../../cns-local/etiquetas/');
+	console.log('Etiqueta impresa: envio', name);
+	fs.writeFile(dir + 'envio.txt', `${boxes};${name};${phone};${address};${city};${details}`, (err) => {
+		console.log(err);
+	});
+});
 
-socket.on('-tag-', (data: DataTag) => {
-	const { boxes, name, phone, address, city, details } = data;
-	const dir = path.join(__dirname, '../../../');
-	// console.log(dir);
-	fs.writeFile(dir + '/envio.txt', `${boxes};${name};${phone};${address};${city};${details}`, () => { })
+// ETIQUETAS DE PRODUCTOS
+interface ProductTag {
+	codigo_pr: string,
+	nombre_pr: string,
+}
+socket.on('-tag-product-', (data: ProductTag) => {
+	const { codigo_pr, nombre_pr, } = data;
+	const dir = path.join(__dirname, '../../cns-local/etiquetas/label/');
+	console.log('Etiqueta impresa: producto', nombre_pr);
+	fs.writeFile(dir + 'label.txt', `SKU: ${codigo_pr};${nombre_pr}`, (err) => {
+		console.log(err);
+	});
 });
