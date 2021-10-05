@@ -32,6 +32,8 @@ module.exports = {
 	watch: NODE_ENV === 'development',
 	optimization: {
 		minimize: true,
-		minimizer: [ new TerserPlugin() ],
+		minimizer: [ new TerserPlugin({
+			extractComments: false
+		}) ],
 	},
 }

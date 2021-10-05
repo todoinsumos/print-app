@@ -1,6 +1,9 @@
-import * as express from 'express';
+
+import express from 'express';
 import { Request, Response } from 'express';
 import { io } from 'socket.io-client';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 
@@ -23,6 +26,18 @@ const socket = io('ws://todoinsumos.com:4000', {
 	reconnectionDelayMax: 10000
 });
 
-socket.on('logs', (data) => {
-	console.log(data);
+interface DataTag {
+	boxes: string,
+	name: string,
+	phone: string,
+	address: string,
+	city: string,
+	details: string
+}
+
+socket.on('-tag-', (data: DataTag) => {
+	const { boxes, name, phone, address, city, details } = data;
+	const dir = path.join(__dirname, '../../../');
+	// console.log(dir);
+	fs.writeFile(dir + '/envio.txt', `${boxes};${name};${phone};${address};${city};${details}`, () => { })
 });
