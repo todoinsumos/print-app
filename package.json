@@ -9,8 +9,11 @@
     "run:dev": "NODE_ENV=development nodemon build/index.js"
   },
   "dependencies": {
+    "axios": "^0.22.0",
     "express": "^4.17.1",
-    "socket.io-client": "^4.2.0"
+    "pdf-to-printer": "^4.0.0",
+    "socket.io-client": "^4.2.0",
+    "unix-print": "^1.0.0-beta-1"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

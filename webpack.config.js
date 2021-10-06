@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable quotes */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
@@ -36,4 +39,4 @@ module.exports = {
 			extractComments: false
 		}) ],
 	},
-}
+};
