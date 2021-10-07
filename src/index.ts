@@ -2,8 +2,8 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { io } from 'socket.io-client';
-import { print, getPrinters } from 'unix-print';
-// import { print, getPrinters } from 'pdf-to-printer';
+// import { print, getPrinters } from 'unix-print';
+import { print, getPrinters } from 'pdf-to-printer';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -53,7 +53,7 @@ socket.on('print-tag-order', (tag: DeliveryTag) => {
 // ETIQUETA DE PRODUCTO
 socket.on('print-tag-product', ({ codigo_pr, nombre_pr }: { codigo_pr: string, nombre_pr: string }) => {
 	const dir = path.join(__dirname, '../../cns-local/etiquetas/label/');
-	fs.writeFile(dir + 'label.txt', `SKU: ${codigo_pr};${nombre_pr}`, (err) => {
+	fs.writeFile(dir + 'label.txt', `SKU: ${codigo_pr};${nombre_pr}`, err => {
 		err
 			? console.warn(err)
 			: console.log('Etiqueta producto ', nombre_pr);
@@ -82,11 +82,16 @@ socket.on('print-invoice', (data: PrintInvoice) => {
 	})
 		.then(data => {
 			fs.createWriteStream('../cns-local/invoice.pdf').write(Buffer.from(data.data, 'utf8'), (err) => {
-				const printer = 'EPSON_XP_2100_Series';
-				const options = [ '-o media=A4' ];
+				// const printer = 'EPSON_XP_2100_Series'; // only macos
+				// const options = [ '-o media=A4' ]; // only macos
+				const options = {
+					printer: 'EPSON_XP_2100_Series',
+					win32: [ '-print-settings "fit"' ],
+				};
 				err && console.log(err);
-				print('../cns-local/invoice.pdf', printer, options)
-					.then((status: string) => {
+				// print('../cns-local/invoice.pdf', printer, options) // only macos
+				print('../cns-local/invoice.pdf', options)
+					.then((status) => {
 						console.log(status);
 						fs.unlink('../cns-local/invoice.pdf', console.log);
 					}).catch((err: Error) => {
@@ -108,7 +113,7 @@ interface PrintOrder {
 	authorization: string
 }
 socket.on('print-order', (data: PrintOrder) => {
-	// getPrinters().then(console.log);
+	getPrinters().then(console.log);
 	axios({
 		url: `http://${url}:3000/orders/pdf`,
 		method: 'POST',
@@ -123,15 +128,22 @@ socket.on('print-order', (data: PrintOrder) => {
 	})
 		.then(data => {
 			fs.createWriteStream('../cns-local/order.pdf').write(Buffer.from(data.data, 'utf8'), (err) => {
-				const printer = 'EPSON_XP_2100_Series';
-				const options = [ '-o media=A4' ];
+				// const printer = 'EPSON_XP_2100_Series';
+				// const options = [ '-o media=A4' ];
+				const options = {
+					printer: 'EPSON_XP_2100_Series',
+					win32: [ '-print-settings "fit"' ],
+				};
 				err && console.log(err);
-				print('../cns-local/order.pdf', printer, options)
-					.then((status: string) => {
+				err && console.log(err);
+				// print('../cns-local/order.pdf', printer, options)
+				print('../cns-local/order.pdf', options)
+					.then((status) => {
 						console.log(status);
-						fs.unlink('../cns-local/order.pdf', () => console.log);
+						fs.unlink('../cns-local/order.pdf', console.log);
 					}).catch((err: Error) => {
 						console.log(err);
+						fs.unlink('../cns-local/order.pdf', console.log);
 					});
 			});
 		})
