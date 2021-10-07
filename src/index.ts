@@ -3,7 +3,8 @@ import express from 'express';
 import { Request, Response } from 'express';
 import { io } from 'socket.io-client';
 // import { print, getPrinters } from 'unix-print';
-import { print, getPrinters } from 'pdf-to-printer';
+import { print } from 'pdf-to-printer';
+// import { getPrinters } from 'pdf-to-printer';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -21,13 +22,12 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-	console.log(`server started at http://${url}:` + PORT);
+	console.log('server started on port:' + PORT);
 });
 
-// TODO: manejar dev production con env
-// const url = 'todoinsumos.com';
-const url = 'localhost';
-const socket = io(`ws://${url}:4000`, {
+const urlSocket = 'ws://todoinsumos.com:4000';
+const urlApi = 'https://todoinsumos.com/api';
+const socket = io(urlSocket, {
 	reconnectionDelayMax: 10000
 });
 
@@ -70,7 +70,7 @@ interface PrintInvoice {
 socket.on('print-invoice', (data: PrintInvoice) => {
 	// getPrinters().then(console.log);
 	axios({
-		url: `http://${url}:3000/invoices/pdf`,
+		url: `${urlApi}/invoices/pdf`,
 		method: 'GET',
 		responseType: 'arraybuffer',
 		headers: {
@@ -91,11 +91,11 @@ socket.on('print-invoice', (data: PrintInvoice) => {
 				err && console.log(err);
 				// print('../cns-local/invoice.pdf', printer, options) // only macos
 				print('../cns-local/invoice.pdf', options)
-					.then((status) => {
-						console.log(status);
+					.then(() => {
+						console.log('Factura impresa');
 						fs.unlink('../cns-local/invoice.pdf', console.log);
-					}).catch((err: Error) => {
-						console.log(err);
+					}).catch(() => {
+						console.log('Error al imprimir factura');
 						fs.unlink('../cns-local/invoice.pdf', console.log);
 					});
 			});
@@ -113,9 +113,9 @@ interface PrintOrder {
 	authorization: string
 }
 socket.on('print-order', (data: PrintOrder) => {
-	getPrinters().then(console.log);
+	// getPrinters().then(console.log);
 	axios({
-		url: `http://${url}:3000/orders/pdf`,
+		url: `${urlApi}/orders/pdf`,
 		method: 'POST',
 		responseType: 'arraybuffer',
 		headers: {
@@ -127,28 +127,27 @@ socket.on('print-order', (data: PrintOrder) => {
 		}
 	})
 		.then(data => {
-			fs.createWriteStream('../cns-local/order.pdf').write(Buffer.from(data.data, 'utf8'), (err) => {
-				// const printer = 'EPSON_XP_2100_Series';
-				// const options = [ '-o media=A4' ];
+			fs.createWriteStream('../cns-local/order2.pdf').write(Buffer.from(data.data), (err) => {
+				// const printer = 'EPSON_XP_2100_Series';  // only macos
+				// const options = [ '-o media=A4' ];  // only macos
 				const options = {
 					printer: 'EPSON_XP_2100_Series',
 					win32: [ '-print-settings "fit"' ],
 				};
-				err && console.log(err);
-				err && console.log(err);
-				// print('../cns-local/order.pdf', printer, options)
+				err && console.log('error escribiendo archivo');
+				// print('../cns-local/order.pdf', printer, options) // only macos
 				print('../cns-local/order.pdf', options)
-					.then((status) => {
-						console.log(status);
+					.then(() => {
+						console.log('Remito impreso');
 						fs.unlink('../cns-local/order.pdf', console.log);
-					}).catch((err: Error) => {
-						console.log(err);
+					}).catch(() => {
+						console.log('Error al imprimir remito');
 						fs.unlink('../cns-local/order.pdf', console.log);
 					});
 			});
 		})
 		.catch(error => {
-			console.log(error);
+			console.log('Error axios', error);
 		});
 
 });
