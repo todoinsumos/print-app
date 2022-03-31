@@ -25,10 +25,11 @@ app.listen(PORT, () => {
 	console.log('server started on port:' + PORT);
 });
 
-const urlSocket = 'wss://socket.todoinsumos.com';
+const urlSocket = 'https://socket.todoinsumos.com';
 const urlApi = 'https://api.todoinsumos.com';
 const socket = io(urlSocket, {
-	reconnectionDelayMax: 10000
+	reconnectionDelayMax: 10000,
+	transports: [ 'websocket' ], port: '4000'
 });
 
 // ETIQUETA DE ENVIO
@@ -88,12 +89,12 @@ socket.on('print-invoice', (data: PrintInvoice) => {
 				};
 				err && console.log(err);
 				// print('../cns-local/invoice.pdf', printer, options) // only macos
-				print('../cns-local/pdfs/invoice.pdf', options)
+				print(`../cns-local/pdfs/${file}`, options)
 					.then(() => {
 						console.log('Factura impresa', file);
 						fs.unlinkSync(`../cns-local/pdfs/${file}`);
 					}).catch((err) => {
-						console.log('Error al imprimir factura',err);
+						console.log('Error al imprimir factura', err);
 						fs.unlinkSync(`../cns-local/pdfs/${file}`);
 					});
 			});
