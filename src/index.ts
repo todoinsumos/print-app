@@ -25,7 +25,7 @@ app.listen(PORT, () => {
 	console.log('server started on port:' + PORT);
 });
 
-const urlSocket = 'https://socket.todoinsumos.com';
+const urlSocket = 'wss://socket.todoinsumos.com';
 const urlApi = 'https://api.todoinsumos.com';
 const socket = io(urlSocket, {
 	reconnectionDelayMax: 10000,
